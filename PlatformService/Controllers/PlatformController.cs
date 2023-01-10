@@ -27,5 +27,21 @@ namespace PlatformService.Controllers
             var allPlatforms = _platformRepo.GetAllPlatforms();
             return Ok(_mapper.Map<IEnumerable<PlatformReadDto>>(allPlatforms));
         }
+
+        [HttpGet("{id:int}")]
+        public ActionResult<PlatformReadDto> GetPlatformById(int id)
+        {
+            var platform = _platformRepo.GetPlatformById(id);
+            if (platform is null) return NotFound();
+            return Ok(_mapper.Map<PlatformReadDto>(platform));
+        }
+
+        [HttpPost]
+        public IActionResult AddPlatform(PlatformCreateDto createDto)
+        {
+            _platformRepo.CreatePlatform(_mapper.Map<Platform>(createDto));
+            if (_platformRepo.SaveChanges()) return NoContent();
+            return UnprocessableEntity();
+        }
     }
 }
