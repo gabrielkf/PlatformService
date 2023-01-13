@@ -28,7 +28,7 @@ namespace PlatformService.Controllers
             return Ok(_mapper.Map<IEnumerable<PlatformReadDto>>(allPlatforms));
         }
 
-        [HttpGet("{id:int}")]
+        [HttpGet("{id:int}", Name = "GetPlatformById")]
         public ActionResult<PlatformReadDto> GetPlatformById(int id)
         {
             var platform = _platformRepo.GetPlatformById(id);
@@ -37,11 +37,15 @@ namespace PlatformService.Controllers
         }
 
         [HttpPost]
-        public IActionResult AddPlatform(PlatformCreateDto createDto)
+        public ActionResult<PlatformReadDto> AddPlatform(PlatformCreateDto createDto)
         {
-            _platformRepo.CreatePlatform(_mapper.Map<Platform>(createDto));
-            if (_platformRepo.SaveChanges()) return NoContent();
-            return UnprocessableEntity();
+            var platformModel = _mapper.Map<Platform>(createDto);
+            _platformRepo.CreatePlatform(platformModel);
+            if (!_platformRepo.SaveChanges()) return UnprocessableEntity();
+
+            return CreatedAtRoute(nameof(GetPlatformById),
+                new { Id = platformModel.Id },
+                _mapper.Map<PlatformReadDto>(platformModel));
         }
     }
 }
